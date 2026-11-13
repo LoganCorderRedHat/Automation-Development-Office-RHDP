@@ -78,7 +78,7 @@ rbac:
       verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
     # Gitea instances (RHDP Gitea operator)
     - apiGroups: ["pfe.rhpds.com"]
-      resources: ["giteas"]
+      resources: ["gitea"]  # CRD gitea.pfe.rhpds.com: plural and singular are both "gitea"
       verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
     # Find the AAP instance from the RHDP base workload (read only)
     - apiGroups: ["aap.ansible.com", "automationcontroller.ansible.com"]

@@ -21,6 +21,19 @@ which sets up the seat without filling in the Preflight form:
 Re-running is safe: existing objects are kept, and the Gitea token is reused
 from its Secret.
 
+**Updating an existing seat.** The setup Job is an Argo CD Sync hook, and Argo
+CD does not compare hooks:
+
+- Changing `ansible.extraVars` (for example an image tag) also changes the
+  tracked ConfigMap, so auto-sync re-runs the setup.
+- Changing only the playbooks or roles does **not** trigger a sync. Re-run the
+  setup with **Sync** on the `field-content` application in the Argo CD
+  console.
+
+The Job clones the repository URL and revision from the RHDP order
+(`gitops.repoURL`, `gitops.revision`), so it always runs the same revision as
+the chart.
+
 Settings are in [`values.yaml`](values.yaml) under `ansible.extraVars`
 (`workshop_namespace`, `preflight_image_override`, `ado_ee_image`). Pin tested
 image tags before running the workshop.

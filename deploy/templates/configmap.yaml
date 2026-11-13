@@ -33,6 +33,13 @@ data:
     {{ . }}
     {{- end }}
 
+  # Copy of the job settings. The setup Job is an Argo CD hook, and Argo CD
+  # does not compare hooks, so changing only ansible.extraVars would not mark
+  # the app OutOfSync. Changing this ConfigMap does, and auto-sync then re-runs
+  # the setup job. (Playbook-only changes still need a manual Sync.)
+  extra-vars.yaml: |
+    {{- toYaml .Values.ansible.extraVars | nindent 4 }}
+
   # Inventory for local execution (connecting to Kubernetes API)
   inventory.yaml: |
     all:

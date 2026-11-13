@@ -20,7 +20,7 @@
 
   vars:
     _workshop_namespace: "{{ workshop_namespace | default('ado-workshop') }}"
-    _ado_ee_image: "{{ ado_ee_image | default('ghcr.io/automation-development-office/ado-ee:latest') }}"
+    _ado_ee_image: "{{ ado_ee_image | default('ghcr.io/automation-development-office/ado-ee:2.1.1') }}"
 
   tasks:
     - name: Create the workshop namespace
@@ -45,7 +45,7 @@
         name: preflight
       vars:
         preflight_namespace: "{{ _workshop_namespace }}"
-        preflight_image: "{{ preflight_image_override | default('ghcr.io/automation-development-office/ado-preflight-ui:latest', true) }}"
+        preflight_image: "{{ preflight_image_override | default('ghcr.io/automation-development-office/ado-preflight-ui:5.0.1-prerelease', true) }}"
 
     - name: Configure AAP
       ansible.builtin.include_role:

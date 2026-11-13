@@ -63,17 +63,19 @@ Confirmed in `ocp4_workload_field_content` (`tasks/workload.yml`):
 | `litemaas.enabled`, `litemaas.apiUrl`, `litemaas.apiKey`, `litemaas.model` | When LiteMaaS is enabled |
 | `multi_user.num_users`, `multi_user.users` | Shared Clusters only |
 
-Merged from the catalog item's Helm values (set in the private AgnosticV
-configuration). The catalog description lists these, but the **exact key
-names are TBD** until read from a real order
-(`oc get application field-content -n openshift-gitops -o yaml`):
+Merged from the catalog item's Helm values (private AgnosticV
+configuration). **Confirmed on a real order** (2026-11-13, Dedicated, CNV,
+AAP base; read from the `field-content` Application):
 
-- `guid`, `user.count` (always 0 for Dedicated Clusters)
-- `bases.virt`, `bases.rhoai`, `bases.aap` (booleans for the selected base workloads)
-- OpenShift console URL and admin credentials
-- Keycloak console URL and admin credentials
-- AAP controller URL and admin credentials (when AAP is selected)
-- OpenShift AI dashboard URL (when AI is selected)
+| Value | Notes |
+|---|---|
+| `guid` | For example `5pxrp-1` |
+| `user.count` | `0` for Dedicated Clusters |
+| `bases.aap`, `bases.virt`, `bases.rhoai` | Booleans for the selected base workloads |
+| `openshift.consoleUrl`, `openshift.adminUsername`, `openshift.adminPassword` | Cluster admin login |
+| `keycloak.consoleUrl`, `keycloak.adminUser`, `keycloak.adminPassword` | RHBK admin login |
+| `aap.url`, `aap.adminUser`, `aap.adminPassword` | AAP platform gateway URL and admin login (AAP base) |
+| `rhoai.dashboardUrl` | `None` unless the AI base is selected |
 
 ### Passing data back to RHDP
 

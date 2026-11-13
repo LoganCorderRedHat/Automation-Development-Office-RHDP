@@ -17,7 +17,9 @@ namespace:
 # Git repository containing your Ansible playbooks
 ansible:
   repository:
-    # IMPORTANT: Update this to point to YOUR playbook repository
+    # Fallbacks only: the job clones gitops.repoURL and gitops.revision from the
+    # RHDP order when they are set, so the playbooks match the chart Argo CD
+    # synced (and forks or other branches work without editing this file).
     url: "https://github.com/LoganCorderRedHat/Automation-Development-Office-RHDP"
     branch: "main"
     # Path within the repo to the playbooks directory
@@ -44,9 +46,12 @@ ansible:
   # Extra variables passed to the playbook
   extraVars:
     workshop_namespace: "ado-workshop"
-    # Pin tested tags before running the workshop.
-    preflight_image_override: "ghcr.io/automation-development-office/ado-preflight-ui:latest"
-    ado_ee_image: "ghcr.io/automation-development-office/ado-ee:latest"
+    # Pinned. Do not use the Preflight "latest" tag: it is app version 1.2.0
+    # and bundles the old infra.ado collection, so generated playbooks call
+    # infra.ado.* roles that ado-ee does not have. 5.0.1-prerelease bundles
+    # infra.automation_development_office 2.1.4; ado-ee 2.1.1 carries 2.1.1.
+    preflight_image_override: "ghcr.io/automation-development-office/ado-preflight-ui:5.0.1-prerelease"
+    ado_ee_image: "ghcr.io/automation-development-office/ado-ee:2.1.1"
 
 # Container configuration
 image:

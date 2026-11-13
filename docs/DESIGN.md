@@ -108,12 +108,20 @@ took about 9 minutes to reach Running.
    - **Running playbooks from the container:** supported. After Bootstrap,
      **Run selected playbooks** runs the generated components inside the pod
      (no AAP); **Preview commands** shows them first.
-4. **Exact Helm value names** for the AAP controller URL and credentials,
-   `guid`, and `bases.*`: read them from a real order.
+4. **Exact Helm value names — answered (first test order).** `aap.url`,
+   `aap.adminUser`, `aap.adminPassword`, `bases.*`, `guid`, `openshift.*`,
+   `keycloak.*`; see [RHDP-PLATFORM.md](RHDP-PLATFORM.md). The `aap` role
+   still finds AAP on the cluster, which matched: `AnsibleAutomationPlatform`
+   `aap` in namespace `aap` (AAP 2.6), Route `aap`, Secret
+   `aap-admin-password`, API `/api/controller/v2/`.
 5. **Timing.** Provisioning takes about 15 minutes on CNV multi-node; the
    live part must fit the session with deploys that take several minutes
    each.
-6. **CNV checks on the first test order:** the default StorageClass and
+6. **CNV checks** (first test order: default StorageClass
+   `ocs-external-storagecluster-ceph-rbd`, CephFS available for
+   ReadWriteMany; 3 control-plane nodes 16 vCPU / 64 GiB and 3 workers
+   8 vCPU / 32 GiB; Showroom ran; sizing with Day 1 apps still to measure):
+   the default StorageClass and
    whether it supports ReadWriteMany (Virtualization and ACS storage); how
    much CPU and memory the chosen Day 1 apps use, to set worker count and
    size (ACM alone took about 9 minutes to install on a test cluster); and
@@ -123,13 +131,15 @@ took about 9 minutes to reach Running.
    themselves. The guide shows each seat's values (cluster API URL, token
    steps, AAP URL and login, Gitea URL, user, token, repo) as Showroom
    attributes from the `userinfo` ConfigMap.
-8. **Collection versions.** The AAP path uses the collection inside `ado-ee`
-   (2.1.1); the container path uses the collection baked into the Preflight
-   image. Pin both image tags and check they carry the same collection
-   version.
-9. **AAP version on RHDP.** Preflight's default EE image is built from the AAP
-   version field (default 2.7); we override the image anyway, but record the
-   RHDP AAP base version and the credential value names from a real order.
+8. **Collection versions.** Found on the first test order: the Preflight
+   `latest` tag is app version 1.2.0 and bundles the **old `infra.ado`
+   2.1.0** collection, so generated playbooks would call `infra.ado.*` roles
+   that `ado-ee` lacks. Pinned `ado-preflight-ui:5.0.1-prerelease` (bundles
+   `infra.automation_development_office` 2.1.4) and `ado-ee:2.1.1` (bundles
+   2.1.1). Remaining gap: playbooks generated with 2.1.4 run with 2.1.1 roles
+   in AAP; check in the dry run.
+9. **AAP version on RHDP — answered.** AAP 2.6 (operator
+   `aap-operator.v2.6.0`). In the Preflight form, pick AAP version 2.6.
 
 10. **Job template EE image.** The generated job templates use the EE named
     in Preflight's *Execution Environment* field (`ee-supported-rhel9`), and
@@ -145,7 +155,11 @@ took about 9 minutes to reach Running.
 3. ~~Replace the placeholder seat setup.~~ Done: `deploy/playbooks/site.yml`
    with roles `gitea`, `preflight`, `aap` (lint and syntax checks pass; not yet
    run on a cluster).
-4. First test order on RHDP to run the seat setup for real.
+4. ~~First test order.~~ Done on cluster-5pxrp: seat setup succeeded after
+   two fixes (Gitea CRD and RBAC name `gitea`; job clones the order's repo
+   and revision). Preflight UI, Gitea (`lab-user`, `ado-bootstrap`, token),
+   AAP collection download off, `userinfo` published, Showroom running.
+   About 6 minutes for the seat setup on a clean run.
 5. Replace the placeholder guide page with the workshop modules.
 
 Done: the starter scaffold from the template (Showroom guide at the root,

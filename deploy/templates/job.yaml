@@ -36,10 +36,12 @@ spec:
         - name: KUBECONFIG
           value: "/tmp/ansible/kubeconfig"
         # Git repository configuration
+        # Same repo and revision as the chart (values from the RHDP order).
+        {{- $gitops := .Values.gitops | default dict }}
         - name: GIT_REPO_URL
-          value: {{ .Values.ansible.repository.url | quote }}
+          value: {{ $gitops.repoURL | default .Values.ansible.repository.url | quote }}
         - name: GIT_REPO_BRANCH
-          value: {{ .Values.ansible.repository.branch | quote }}
+          value: {{ $gitops.revision | default .Values.ansible.repository.branch | quote }}
         - name: PLAYBOOK_PATH
           value: {{ .Values.ansible.playbook | quote }}
         - name: NAMESPACE

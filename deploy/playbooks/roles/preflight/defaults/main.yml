@@ -3,8 +3,8 @@
 # does it: Deployment, workspace PVC, Service, and an edge-TLS Route.
 preflight_namespace: ado-workshop
 preflight_name: ado-preflight-ui
-# Pin a tested tag before running the workshop.
-preflight_image: ghcr.io/automation-development-office/ado-preflight-ui:latest
+# Pinned tag. "latest" is Preflight 1.2.0 with the old infra.ado collection.
+preflight_image: ghcr.io/automation-development-office/ado-preflight-ui:5.0.1-prerelease
 preflight_storage_size: 5Gi
 preflight_terminal_enabled: "true"
 preflight_wait_retries: 60

@@ -1,0 +1,102 @@
+---
+# Finds the AAP instance installed by the RHDP base workload (AAP 2.5+ platform
+# or a standalone Automation Controller), records its URL and admin login, and
+# turns off Controller collection download. Skips with a warning when no AAP
+# is installed (the container path still works).
+- name: AAP | Find an Ansible Automation Platform instance
+  kubernetes.core.k8s_info:
+    api_version: aap.ansible.com/v1alpha1
+    kind: AnsibleAutomationPlatform
+  register: aap_platforms
+
+- name: AAP | Find a standalone Automation Controller
+  kubernetes.core.k8s_info:
+    api_version: automationcontroller.ansible.com/v1beta1
+    kind: AutomationController
+  register: aap_controllers
+  when: aap_platforms.resources | default([]) | length == 0
+
+- name: AAP | Choose the instance
+  ansible.builtin.set_fact:
+    aap_instance: >-
+      {{
+        (aap_platforms.resources | default([]) | first)
+        if aap_platforms.resources | default([]) | length > 0
+        else (aap_controllers.resources | default([]) | first | default({}, true))
+      }}
+    aap_is_platform: "{{ aap_platforms.resources | default([]) | length > 0 }}"
+
+- name: AAP | Report a missing AAP
+  ansible.builtin.debug:
+    msg: >-
+      No AnsibleAutomationPlatform or AutomationController found. Order the RHDP
+      item with the Ansible Automation Platform base workload to use the AAP path.
+  when: aap_instance | length == 0
+
+- name: AAP | Configure the controller
+  when: aap_instance | length > 0
+  block:
+    - name: AAP | Read the route and admin password
+      kubernetes.core.k8s_info:
+        api_version: "{{ item.api_version }}"
+        kind: "{{ item.kind }}"
+        name: "{{ item.name }}"
+        namespace: "{{ aap_instance.metadata.namespace }}"
+      loop:
+        - {api_version: route.openshift.io/v1, kind: Route, name: "{{ aap_instance.metadata.name }}"}
+        - {api_version: v1, kind: Secret, name: "{{ aap_instance.metadata.name }}-admin-password"}
+      loop_control:
+        label: "{{ item.kind }}/{{ item.name }}"
+      register: aap_reads
+      until: aap_reads.resources | default([]) | length > 0
+      retries: "{{ aap_wait_retries }}"
+      delay: "{{ aap_wait_delay }}"
+      no_log: true
+
+    - name: AAP | Record the URL, API base, and admin login
+      ansible.builtin.set_fact:
+        aap_url: "https://{{ aap_reads.results[0].resources[0].spec.host }}"
+        # AAP 2.5+ serves the controller API behind the platform gateway.
+        aap_api_base: >-
+          https://{{ aap_reads.results[0].resources[0].spec.host }}{{ '/api/controller/v2' if aap_is_platform | bool else '/api/v2' }}
+        aap_admin_user: admin
+        aap_admin_password: "{{ aap_reads.results[1].resources[0].data.password | b64decode }}"
+      no_log: true
+
+    - name: AAP | Wait for the controller API
+      ansible.builtin.uri:
+        url: "{{ aap_api_base }}/ping/"
+        validate_certs: false
+        status_code: 200
+      register: aap_ping
+      until: aap_ping is succeeded
+      retries: "{{ aap_wait_retries }}"
+      delay: "{{ aap_wait_delay }}"
+
+    - name: AAP | Turn off collection download (jobs use the ado-ee collections)
+      ansible.builtin.uri:
+        url: "{{ aap_api_base }}/settings/jobs/"
+        method: PATCH
+        user: "{{ aap_admin_user }}"
+        password: "{{ aap_admin_password }}"
+        force_basic_auth: true
+        validate_certs: false
+        body_format: json
+        body:
+          AWX_COLLECTIONS_ENABLED: false
+        status_code: 200
+      register: aap_settings
+      until: aap_settings is succeeded
+      retries: 10
+      delay: "{{ aap_wait_delay }}"
+      when: aap_disable_collection_download | bool
+      changed_when: true
+      no_log: true
+
+    - name: AAP | Confirm collection download is off
+      ansible.builtin.assert:
+        that:
+          - aap_settings.json.AWX_COLLECTIONS_ENABLED is false
+        fail_msg: AWX_COLLECTIONS_ENABLED is still on after the update.
+        quiet: true
+      when: aap_disable_collection_download | bool

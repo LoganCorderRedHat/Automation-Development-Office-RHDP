@@ -1,0 +1,235 @@
+---
+# Installs the RHDP Gitea operator, creates a Gitea instance with one attendee
+# account, an empty bootstrap repository, and an access token. Safe to re-run.
+- name: Gitea | Create the operator namespace, catalog, and operator group
+  kubernetes.core.k8s:
+    state: present
+    definition: "{{ item }}"
+  loop:
+    - apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: "{{ gitea_operator_namespace }}"
+        labels:
+          demo.redhat.com/application: ado-workshop
+    - apiVersion: operators.coreos.com/v1alpha1
+      kind: CatalogSource
+      metadata:
+        name: redhat-rhpds-gitea
+        namespace: "{{ gitea_operator_namespace }}"
+      spec:
+        sourceType: grpc
+        image: "{{ gitea_catalog_image }}"
+        displayName: Red Hat Demo Platform (Gitea)
+        publisher: Red Hat Demo Platform
+    - apiVersion: operators.coreos.com/v1
+      kind: OperatorGroup
+      metadata:
+        name: gitea-operator
+        namespace: "{{ gitea_operator_namespace }}"
+      spec:
+        targetNamespaces: []
+  loop_control:
+    label: "{{ item.kind }}/{{ item.metadata.name }}"
+
+- name: Gitea | Install the operator and wait for it
+  ansible.builtin.include_role:
+    name: operator_install
+  vars:
+    operator_install_name: gitea-operator
+    operator_install_channel: stable
+    operator_install_namespace: "{{ gitea_operator_namespace }}"
+    operator_install_source: redhat-rhpds-gitea
+    operator_install_source_namespace: "{{ gitea_operator_namespace }}"
+
+- name: Gitea | Wait for the Gitea API to be served
+  kubernetes.core.k8s_info:
+    api_version: apiextensions.k8s.io/v1
+    kind: CustomResourceDefinition
+    name: giteas.pfe.rhpds.com
+  register: gitea_crd
+  until: >-
+    gitea_crd.resources | length > 0
+    and (gitea_crd.resources[0].status.conditions | default([])
+         | selectattr('type', 'equalto', 'Established')
+         | selectattr('status', 'equalto', 'True') | list | length > 0)
+  retries: "{{ gitea_wait_retries }}"
+  delay: "{{ gitea_wait_delay }}"
+
+- name: Gitea | Create the Gitea namespace
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: "{{ gitea_namespace }}"
+        labels:
+          demo.redhat.com/application: ado-workshop
+
+- name: Gitea | Create the Gitea instance with one attendee account
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: pfe.rhpds.com/v1
+      kind: Gitea
+      metadata:
+        name: "{{ gitea_instance_name }}"
+        namespace: "{{ gitea_namespace }}"
+        labels:
+          demo.redhat.com/application: ado-workshop
+      spec:
+        giteaSsl: true
+        giteaAdminUser: gitea-admin
+        giteaAdminEmail: gitea-admin@example.com
+        giteaAdminPassword: ""
+        giteaAdminPasswordLength: 24
+        giteaCreateUsers: true
+        giteaGenerateUserFormat: "{{ gitea_user }}"
+        giteaUserNumber: 1
+        giteaUserPasswordLength: 16
+        giteaDisableRegistration: true
+
+- name: Gitea | Wait for the instance, admin, and attendee account
+  kubernetes.core.k8s_info:
+    api_version: pfe.rhpds.com/v1
+    kind: Gitea
+    name: "{{ gitea_instance_name }}"
+    namespace: "{{ gitea_namespace }}"
+  register: gitea_cr
+  until: >-
+    gitea_cr.resources | length > 0
+    and (gitea_cr.resources[0].status.giteaRoute | default('')) | length > 0
+    and (gitea_cr.resources[0].status.adminSetupComplete | default(false) | bool)
+    and (gitea_cr.resources[0].status.userSetupComplete | default(false) | bool)
+  retries: "{{ gitea_wait_retries }}"
+  delay: "{{ gitea_wait_delay }}"
+
+- name: Gitea | Record the URL and attendee login
+  ansible.builtin.set_fact:
+    gitea_url: "{{ gitea_cr.resources[0].status.giteaRoute | regex_replace('/$', '') }}"
+    gitea_user_password: "{{ gitea_cr.resources[0].status.userPassword }}"
+  no_log: true
+
+- name: Gitea | Wait for the Gitea API to answer
+  ansible.builtin.uri:
+    url: "{{ gitea_url }}/api/v1/version"
+    validate_certs: false
+    status_code: 200
+  register: gitea_version
+  until: gitea_version is succeeded
+  retries: "{{ gitea_wait_retries }}"
+  delay: "{{ gitea_wait_delay }}"
+
+- name: Gitea | Check for the bootstrap repository
+  ansible.builtin.uri:
+    url: "{{ gitea_url }}/api/v1/repos/{{ gitea_user }}/{{ gitea_repo_name }}"
+    user: "{{ gitea_user }}"
+    password: "{{ gitea_user_password }}"
+    force_basic_auth: true
+    validate_certs: false
+    status_code: [200, 404]
+  register: gitea_repo
+  no_log: true
+
+# ADO Bootstrap clones this repository, so it needs a first commit (auto_init).
+- name: Gitea | Create the empty bootstrap repository
+  ansible.builtin.uri:
+    url: "{{ gitea_url }}/api/v1/user/repos"
+    method: POST
+    user: "{{ gitea_user }}"
+    password: "{{ gitea_user_password }}"
+    force_basic_auth: true
+    validate_certs: false
+    body_format: json
+    body:
+      name: "{{ gitea_repo_name }}"
+      description: ADO bootstrap repository (generated by ADO Preflight)
+      private: false
+      auto_init: true
+      default_branch: main
+    status_code: 201
+  when: gitea_repo.status == 404
+  changed_when: true
+  no_log: true
+
+- name: Gitea | Read a saved access token
+  kubernetes.core.k8s_info:
+    api_version: v1
+    kind: Secret
+    name: "{{ gitea_token_secret_name }}"
+    namespace: "{{ gitea_token_secret_namespace }}"
+  register: gitea_token_secret
+  no_log: true
+
+- name: Gitea | Create the access token
+  when: gitea_token_secret.resources | length == 0
+  no_log: true
+  block:
+    - name: Gitea | List existing tokens
+      ansible.builtin.uri:
+        url: "{{ gitea_url }}/api/v1/users/{{ gitea_user }}/tokens"
+        user: "{{ gitea_user }}"
+        password: "{{ gitea_user_password }}"
+        force_basic_auth: true
+        validate_certs: false
+      register: gitea_tokens
+
+    # A token with this name but no saved Secret cannot be read back; replace it.
+    - name: Gitea | Delete an unreadable token with the same name
+      ansible.builtin.uri:
+        url: "{{ gitea_url }}/api/v1/users/{{ gitea_user }}/tokens/{{ item.id }}"
+        method: DELETE
+        user: "{{ gitea_user }}"
+        password: "{{ gitea_user_password }}"
+        force_basic_auth: true
+        validate_certs: false
+        status_code: 204
+      loop: "{{ gitea_tokens.json | default([]) | selectattr('name', 'equalto', gitea_token_name) | list }}"
+      changed_when: true
+
+    - name: Gitea | Create a token with repository write access
+      ansible.builtin.uri:
+        url: "{{ gitea_url }}/api/v1/users/{{ gitea_user }}/tokens"
+        method: POST
+        user: "{{ gitea_user }}"
+        password: "{{ gitea_user_password }}"
+        force_basic_auth: true
+        validate_certs: false
+        body_format: json
+        body:
+          name: "{{ gitea_token_name }}"
+          scopes: [write:repository, read:user]
+        status_code: 201
+      register: gitea_new_token
+      changed_when: true
+
+    - name: Gitea | Save the token
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: "{{ gitea_token_secret_name }}"
+            namespace: "{{ gitea_token_secret_namespace }}"
+            labels:
+              demo.redhat.com/application: ado-workshop
+          type: Opaque
+          stringData:
+            token: "{{ gitea_new_token.json.sha1 }}"
+
+- name: Gitea | Read the saved access token
+  kubernetes.core.k8s_info:
+    api_version: v1
+    kind: Secret
+    name: "{{ gitea_token_secret_name }}"
+    namespace: "{{ gitea_token_secret_namespace }}"
+  register: gitea_token_secret
+  no_log: true
+
+- name: Gitea | Record the repository and token
+  ansible.builtin.set_fact:
+    gitea_repo_url: "{{ gitea_url }}/{{ gitea_user }}/{{ gitea_repo_name }}.git"
+    gitea_token: "{{ gitea_token_secret.resources[0].data.token | b64decode }}"
+  no_log: true

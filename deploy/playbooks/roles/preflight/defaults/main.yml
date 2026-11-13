@@ -1,0 +1,11 @@
+---
+# ADO Preflight UI, deployed the way the Preflight repo's deploy/preflight.yaml
+# does it: Deployment, workspace PVC, Service, and an edge-TLS Route.
+preflight_namespace: ado-workshop
+preflight_name: ado-preflight-ui
+# Pin a tested tag before running the workshop.
+preflight_image: ghcr.io/automation-development-office/ado-preflight-ui:latest
+preflight_storage_size: 5Gi
+preflight_terminal_enabled: "true"
+preflight_wait_retries: 60
+preflight_wait_delay: 10

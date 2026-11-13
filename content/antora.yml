@@ -1,0 +1,15 @@
+name: modules
+title: ADO Workshop
+version: ~
+nav:
+  - modules/ROOT/nav.adoc
+
+asciidoc:
+  attributes:
+    experimental: true
+    page-pagination: true
+    # Placeholders for local builds. At order time Showroom replaces these with
+    # each seat's real values (RHDP user data and our userinfo ConfigMap).
+    guid: abc123
+    openshift_console_url: https://console-openshift-console.apps.cluster-abc123.example.com
+    openshift_cluster_ingress_domain: apps.cluster-abc123.example.com

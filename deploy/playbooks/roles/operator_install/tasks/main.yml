@@ -1,0 +1,87 @@
+---
+# Install an operator via OLM and wait for it to be ready
+# This demonstrates Ansible's advantage over Helm/Kustomize:
+# - Check existing state before acting
+# - Wait for resources to be ready
+# - Conditional logic
+# - Multi-step workflows
+
+# Step 1: Check if operator is already installed
+- name: Check if Subscription already exists
+  kubernetes.core.k8s_info:
+    api_version: operators.coreos.com/v1alpha1
+    kind: Subscription
+    name: "{{ operator_install_name }}"
+    namespace: "{{ operator_install_namespace }}"
+  register: operator_install_existing_subscription
+
+- name: Set operator already installed fact
+  ansible.builtin.set_fact:
+    operator_install_already_installed: >-
+      {{ operator_install_existing_subscription.resources | length > 0 and
+         operator_install_existing_subscription.resources[0].status.currentCSV is defined }}
+
+- name: Operator already installed - skipping
+  ansible.builtin.debug:
+    msg: "Operator {{ operator_install_name }} is already installed ({{ operator_install_existing_subscription.resources[0].status.currentCSV }})"
+  when: operator_install_already_installed
+
+# Step 2: Install operator if not already present
+- name: Create Subscription for {{ operator_install_name }}
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: operators.coreos.com/v1alpha1
+      kind: Subscription
+      metadata:
+        name: "{{ operator_install_name }}"
+        namespace: "{{ operator_install_namespace }}"
+        labels:
+          demo.redhat.com/application: "{{ operator_install_name }}"
+      spec:
+        channel: "{{ operator_install_channel }}"
+        installPlanApproval: Automatic
+        name: "{{ operator_install_name }}"
+        source: "{{ operator_install_source }}"
+        sourceNamespace: "{{ operator_install_source_namespace }}"
+  when: not operator_install_already_installed
+
+- name: Wait for Subscription to have a currentCSV
+  kubernetes.core.k8s_info:
+    api_version: operators.coreos.com/v1alpha1
+    kind: Subscription
+    name: "{{ operator_install_name }}"
+    namespace: "{{ operator_install_namespace }}"
+  register: operator_install_subscription_info
+  until: >-
+    operator_install_subscription_info.resources | length > 0 and
+    operator_install_subscription_info.resources[0].status.currentCSV is defined
+  retries: "{{ operator_install_wait_retries }}"
+  delay: "{{ operator_install_wait_delay }}"
+  when: not operator_install_already_installed
+
+# Step 3: Wait for CSV to be ready (applies to both new and existing installs)
+- name: Get the CSV name
+  ansible.builtin.set_fact:
+    operator_install_csv: >-
+      {{ operator_install_existing_subscription.resources[0].status.currentCSV
+         if operator_install_already_installed
+         else operator_install_subscription_info.resources[0].status.currentCSV }}
+
+- name: Wait for ClusterServiceVersion to succeed
+  kubernetes.core.k8s_info:
+    api_version: operators.coreos.com/v1alpha1
+    kind: ClusterServiceVersion
+    name: "{{ operator_install_csv }}"
+    namespace: "{{ operator_install_namespace }}"
+  register: operator_install_csv_info
+  until: >-
+    operator_install_csv_info.resources | length > 0 and
+    operator_install_csv_info.resources[0].status.phase is defined and
+    operator_install_csv_info.resources[0].status.phase == "Succeeded"
+  retries: "{{ operator_install_wait_retries }}"
+  delay: "{{ operator_install_wait_delay }}"
+
+- name: Operator is ready | {{ operator_install_name }}
+  ansible.builtin.debug:
+    msg: "Operator {{ operator_install_name }} ({{ operator_install_csv }}) is ready for use"

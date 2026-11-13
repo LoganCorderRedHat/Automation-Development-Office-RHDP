@@ -1,0 +1,12 @@
+= Welcome to the ADO workshop
+:navtitle: Welcome
+
+NOTE: Draft placeholder. The workshop modules are being written; see `docs/DESIGN.md` in the repository.
+
+In this workshop you use *ADO (Automation Development Office)* to automate an OpenShift cluster that is yours for the session:
+
+. Answer a few questions in the *ADO Preflight UI*.
+. Run *Bootstrap*. ADO generates a Git repository of playbooks and creates the matching job templates in *Ansible Automation Platform*.
+. Run those job templates to deploy OpenShift Day 1 apps, and watch them come up in the cluster.
+
+Your cluster: {openshift_console_url}

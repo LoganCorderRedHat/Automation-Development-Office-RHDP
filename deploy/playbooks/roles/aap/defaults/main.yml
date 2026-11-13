@@ -1,0 +1,8 @@
+---
+# The RHDP AAP base workload (licensed Automation Controller, no Hub).
+# Without a Hub, Controller project sync cannot install the ADO collection from
+# collections/requirements.yml (it is not on public Galaxy), so collection
+# download is turned off and jobs use the collections inside the ado-ee image.
+aap_disable_collection_download: true
+aap_wait_retries: 60
+aap_wait_delay: 10

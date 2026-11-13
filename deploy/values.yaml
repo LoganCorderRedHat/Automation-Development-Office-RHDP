@@ -1,0 +1,100 @@
+# ADO workshop seat setup - GitOps configuration
+# Runs deploy/playbooks/site.yml in an Ansible Runner job on each seat's cluster.
+
+# Job configuration
+job:
+  name: ado-workshop-setup
+  # 0 keeps the finished job so its logs stay available (oc logs job/...).
+  ttlSecondsAfterFinished: 0
+  restartPolicy: Never
+
+# Namespace where the ansible-runner job runs
+# NOTE: Do NOT use openshift-operators - that namespace is for operators only
+namespace:
+  name: ado-workshop-setup
+  create: true
+
+# Git repository containing your Ansible playbooks
+ansible:
+  repository:
+    # IMPORTANT: Update this to point to YOUR playbook repository
+    url: "https://github.com/LoganCorderRedHat/Automation-Development-Office-RHDP"
+    branch: "main"
+    # Path within the repo to the playbooks directory
+    path: "deploy/playbooks"
+
+  # Main playbook to execute
+  playbook: "site.yml"
+
+  # Python packages to install
+  requirements:
+    - ansible-core
+    - ansible-runner
+    - kubernetes
+    - openshift
+    - PyYAML
+    - requests
+
+  # Ansible collections (pinned for ansible-core 2.15.x compatibility)
+  collections:
+    - kubernetes.core:==3.2.0
+    - community.general:==9.5.0
+    - community.crypto:==2.22.3
+
+  # Extra variables passed to the playbook
+  extraVars:
+    workshop_namespace: "ado-workshop"
+    # Pin tested tags before running the workshop.
+    preflight_image_override: "ghcr.io/automation-development-office/ado-preflight-ui:latest"
+    ado_ee_image: "ghcr.io/automation-development-office/ado-ee:latest"
+
+# Container configuration
+image:
+  repository: registry.redhat.io/ubi8/python-39
+  tag: latest
+  pullPolicy: IfNotPresent
+
+# Resource limits and requests
+resources:
+  requests:
+    cpu: "200m"
+    memory: "256Mi"
+  limits:
+    cpu: "1000m"
+    memory: "1Gi"
+
+# ServiceAccount configuration
+serviceAccount:
+  name: ado-workshop-setup
+  annotations: {}
+
+# RBAC - permissions for the playbook
+rbac:
+  create: true
+  additionalRules:
+    # Gitea operator install (catalog, operator group, subscription) and waits
+    - apiGroups: ["operators.coreos.com"]
+      resources: ["subscriptions", "clusterserviceversions", "installplans", "catalogsources", "operatorgroups"]
+      verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+    # Gitea instances (RHDP Gitea operator)
+    - apiGroups: ["pfe.rhpds.com"]
+      resources: ["giteas"]
+      verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+    # Find the AAP instance from the RHDP base workload (read only)
+    - apiGroups: ["aap.ansible.com", "automationcontroller.ansible.com"]
+      resources: ["*"]
+      verbs: ["get", "list", "watch"]
+    # Wait for operator APIs to be served
+    - apiGroups: ["apiextensions.k8s.io"]
+      resources: ["customresourcedefinitions"]
+      verbs: ["get", "list", "watch"]
+
+# Sync wave for ArgoCD deployment order
+syncWave:
+  rbac: "1"
+  job: "2"
+
+# Values injected by field content workload
+deployer:
+  domain: ""
+  apiUrl: ""

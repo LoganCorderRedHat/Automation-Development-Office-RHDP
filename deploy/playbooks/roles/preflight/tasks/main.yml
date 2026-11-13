@@ -1,0 +1,151 @@
+---
+# Deploys the ADO Preflight UI and waits until it answers. Attendees fill out
+# the form themselves; nothing is pre-filled.
+- name: Preflight | Deploy the Preflight UI
+  kubernetes.core.k8s:
+    state: present
+    definition: "{{ item }}"
+  loop:
+    - apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        name: "{{ preflight_name }}-workspace"
+        namespace: "{{ preflight_namespace }}"
+        labels:
+          demo.redhat.com/application: ado-workshop
+      spec:
+        accessModes: [ReadWriteOnce]
+        resources:
+          requests:
+            storage: "{{ preflight_storage_size }}"
+    - apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: "{{ preflight_name }}"
+        namespace: "{{ preflight_namespace }}"
+        labels:
+          app: "{{ preflight_name }}"
+          demo.redhat.com/application: ado-workshop
+      spec:
+        replicas: 1
+        strategy:
+          type: Recreate  # RWO workspace volume
+        selector:
+          matchLabels:
+            app: "{{ preflight_name }}"
+        template:
+          metadata:
+            labels:
+              app: "{{ preflight_name }}"
+          spec:
+            containers:
+              - name: preflight
+                image: "{{ preflight_image }}"
+                imagePullPolicy: Always
+                ports:
+                  - name: http
+                    containerPort: 8080
+                env:
+                  - name: PORT
+                    value: "8080"
+                  - name: ADO_PREFLIGHT_TERMINAL_ENABLED
+                    value: "{{ preflight_terminal_enabled }}"
+                volumeMounts:
+                  - name: workspace
+                    mountPath: /workspace
+                readinessProbe:
+                  httpGet:
+                    path: /api/ui-version
+                    port: http
+                  initialDelaySeconds: 5
+                  periodSeconds: 10
+                livenessProbe:
+                  httpGet:
+                    path: /api/ui-version
+                    port: http
+                  initialDelaySeconds: 15
+                  periodSeconds: 20
+                resources:
+                  requests:
+                    cpu: 250m
+                    memory: 512Mi
+                  limits:
+                    cpu: "2"
+                    memory: 2Gi
+            volumes:
+              - name: workspace
+                persistentVolumeClaim:
+                  claimName: "{{ preflight_name }}-workspace"
+    - apiVersion: v1
+      kind: Service
+      metadata:
+        name: "{{ preflight_name }}"
+        namespace: "{{ preflight_namespace }}"
+        labels:
+          demo.redhat.com/application: ado-workshop
+      spec:
+        selector:
+          app: "{{ preflight_name }}"
+        ports:
+          - name: http
+            port: 8080
+            targetPort: http
+    - apiVersion: route.openshift.io/v1
+      kind: Route
+      metadata:
+        name: "{{ preflight_name }}"
+        namespace: "{{ preflight_namespace }}"
+        labels:
+          demo.redhat.com/application: ado-workshop
+        annotations:
+          # Bootstrap runs stream output for several minutes.
+          haproxy.router.openshift.io/timeout: 15m
+      spec:
+        to:
+          kind: Service
+          name: "{{ preflight_name }}"
+        port:
+          targetPort: http
+        tls:
+          termination: edge
+          insecureEdgeTerminationPolicy: Redirect
+  loop_control:
+    label: "{{ item.kind }}/{{ item.metadata.name }}"
+
+- name: Preflight | Wait for the Preflight UI to be ready
+  kubernetes.core.k8s_info:
+    api_version: apps/v1
+    kind: Deployment
+    name: "{{ preflight_name }}"
+    namespace: "{{ preflight_namespace }}"
+  register: preflight_deploy
+  until: >-
+    preflight_deploy.resources | length > 0
+    and (preflight_deploy.resources[0].status.availableReplicas | default(0)) >= 1
+  retries: "{{ preflight_wait_retries }}"
+  delay: "{{ preflight_wait_delay }}"
+
+- name: Preflight | Read the route
+  kubernetes.core.k8s_info:
+    api_version: route.openshift.io/v1
+    kind: Route
+    name: "{{ preflight_name }}"
+    namespace: "{{ preflight_namespace }}"
+  register: preflight_route
+  until: (preflight_route.resources[0].status.ingress | default([])) | length > 0
+  retries: "{{ preflight_wait_retries }}"
+  delay: "{{ preflight_wait_delay }}"
+
+- name: Preflight | Record the URL
+  ansible.builtin.set_fact:
+    preflight_url: "https://{{ preflight_route.resources[0].spec.host }}"
+
+- name: Preflight | Wait for the Preflight UI to answer through its route
+  ansible.builtin.uri:
+    url: "{{ preflight_url }}/api/ui-version"
+    validate_certs: false
+    status_code: 200
+  register: preflight_version
+  until: preflight_version is succeeded
+  retries: "{{ preflight_wait_retries }}"
+  delay: "{{ preflight_wait_delay }}"

@@ -1,0 +1,16 @@
+---
+# Default variables for operator-install role
+
+# Operator to install
+operator_install_name: "web-terminal"
+operator_install_channel: "fast"
+operator_install_namespace: "openshift-operators"
+operator_install_source: "redhat-operators"
+operator_install_source_namespace: "openshift-marketplace"
+
+# Cluster domain (provided by ansible-runner)
+operator_install_cluster_domain: "apps.cluster.example.com"
+
+# Timeouts
+operator_install_wait_retries: 60
+operator_install_wait_delay: 10

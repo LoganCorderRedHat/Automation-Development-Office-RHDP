@@ -1,0 +1,18 @@
+---
+# In-cluster Git server for the generated ADO bootstrap repository
+# (RHDP Gitea operator: https://github.com/rhpds/gitea-operator).
+gitea_operator_namespace: gitea-operator
+gitea_catalog_image: quay.io/rhpds/gitea-catalog:latest
+gitea_namespace: gitea
+gitea_instance_name: gitea
+# One attendee account per seat (giteaGenerateUserFormat with giteaUserNumber: 1).
+gitea_user: lab-user
+# Empty repository (first commit only) that ADO Bootstrap pushes into.
+gitea_repo_name: ado-bootstrap
+gitea_token_name: ado-workshop
+# The token is shown only once by Gitea, so it is kept in this Secret and
+# reused when the job runs again.
+gitea_token_secret_namespace: ado-workshop
+gitea_token_secret_name: ado-workshop-gitea-token
+gitea_wait_retries: 60
+gitea_wait_delay: 10

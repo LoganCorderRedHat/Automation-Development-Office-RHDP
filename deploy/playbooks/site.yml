@@ -1,0 +1,86 @@
+---
+# ADO workshop seat setup.
+#
+# Runs once per seat in the Ansible Runner job (deploy/templates/job.yaml) with
+# the job's service account. Variables from the job: cluster_domain,
+# cluster_api_url, namespace, plus ansible.extraVars in deploy/values.yaml.
+#
+# Sets up what the attendee needs to walk through ADO, without filling in the
+# Preflight form for them:
+#   1. Gitea with the attendee account, an empty bootstrap repo, and a token
+#   2. The ADO Preflight UI
+#   3. AAP: collection download off (jobs use the ado-ee image's collections)
+#   4. A userinfo ConfigMap: URLs and logins for the order page and the guide
+# Safe to run again.
+
+- name: Set up an ADO workshop seat
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  vars:
+    _workshop_namespace: "{{ workshop_namespace | default('ado-workshop') }}"
+    _ado_ee_image: "{{ ado_ee_image | default('ghcr.io/automation-development-office/ado-ee:latest') }}"
+
+  tasks:
+    - name: Create the workshop namespace
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: v1
+          kind: Namespace
+          metadata:
+            name: "{{ _workshop_namespace }}"
+            labels:
+              demo.redhat.com/application: ado-workshop
+
+    - name: Set up Gitea
+      ansible.builtin.include_role:
+        name: gitea
+      vars:
+        gitea_token_secret_namespace: "{{ _workshop_namespace }}"
+
+    - name: Deploy the ADO Preflight UI
+      ansible.builtin.include_role:
+        name: preflight
+      vars:
+        preflight_namespace: "{{ _workshop_namespace }}"
+        preflight_image: "{{ preflight_image_override | default('ghcr.io/automation-development-office/ado-preflight-ui:latest', true) }}"
+
+    - name: Configure AAP
+      ansible.builtin.include_role:
+        name: aap
+
+    - name: Publish seat information to RHDP and the lab guide
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: v1
+          kind: ConfigMap
+          metadata:
+            name: ado-workshop-userinfo
+            namespace: "{{ _workshop_namespace }}"
+            labels:
+              demo.redhat.com/userinfo: ""
+              demo.redhat.com/application: ado-workshop
+          data:
+            ado_workshop_status: ready
+            openshift_api_url: "{{ cluster_api_url }}"
+            preflight_url: "{{ preflight_url }}"
+            gitea_url: "{{ gitea_url }}"
+            gitea_user: "{{ gitea_user | default('lab-user') }}"
+            gitea_password: "{{ gitea_user_password }}"
+            gitea_token: "{{ gitea_token }}"
+            bootstrap_repo_url: "{{ gitea_repo_url }}"
+            aap_url: "{{ aap_url | default('') }}"
+            aap_admin_user: "{{ aap_admin_user | default('') }}"
+            aap_admin_password: "{{ aap_admin_password | default('') }}"
+            ado_ee_image: "{{ _ado_ee_image }}"
+      no_log: true
+
+    - name: Seat is ready
+      ansible.builtin.debug:
+        msg:
+          - "Preflight UI: {{ preflight_url }}"
+          - "Gitea: {{ gitea_url }} (user {{ gitea_user | default('lab-user') }}), bootstrap repo {{ gitea_repo_url }}"
+          - "AAP: {{ aap_url | default('not installed') }}"

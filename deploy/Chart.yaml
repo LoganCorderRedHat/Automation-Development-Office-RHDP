@@ -1,0 +1,16 @@
+apiVersion: v2
+name: ado-workshop-setup
+description: Sets up each ADO workshop seat (Preflight UI, Git server, user info) with an Ansible Runner job
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+
+# This chart includes the ansible-runner templates directly
+# The ansible-runner Job:
+# 1. Clones your playbook repository
+# 2. Installs required collections
+# 3. Runs your playbook
+
+maintainers:
+  - name: Logan Corder
+    email: lcorder@redhat.com

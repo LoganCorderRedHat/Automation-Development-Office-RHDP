@@ -3,4 +3,5 @@
 :preflight_url: https://ado-preflight-ui-ado-workshop.{openshift_cluster_ingress_domain}
 :gitea_url: https://gitea-gitea.{openshift_cluster_ingress_domain}
 :gitea_user: lab-user
+:gitea_password: redhat123
 :bootstrap_repo_url: https://gitea-gitea.{openshift_cluster_ingress_domain}/lab-user/ado-bootstrap.git

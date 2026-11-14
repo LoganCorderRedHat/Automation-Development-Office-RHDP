@@ -77,7 +77,7 @@ This is where Bootstrap pushes the generated repository.
 |`{gitea_user}`
 
 |Git token
-|Your Gitea password, `{openshift_cluster_admin_password}` (Gitea accepts it over HTTPS)
+|Your Gitea password, `{gitea_password}` (Gitea accepts it over HTTPS)
 |===
 
 == Step 4: Ansible Automation Platform Configuration

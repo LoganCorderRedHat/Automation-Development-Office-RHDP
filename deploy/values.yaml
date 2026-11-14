@@ -52,6 +52,8 @@ ansible:
     # infra.automation_development_office 2.1.4; ado-ee 2.1.1 carries 2.1.1.
     preflight_image_override: "ghcr.io/automation-development-office/ado-preflight-ui:5.0.1-prerelease"
     ado_ee_image: "ghcr.io/automation-development-office/ado-ee:2.1.1"
+    # Gitea lab-user password, the same on every seat (shown in the guide).
+    gitea_user_password: "redhat123"
 
 # Container configuration
 image:

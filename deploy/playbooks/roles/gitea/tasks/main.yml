@@ -140,6 +140,27 @@
   retries: "{{ gitea_wait_retries }}"
   delay: "{{ gitea_wait_delay }}"
 
+# The operator applies a password only when it creates the account, so set it
+# through the admin API on every run (also fixes seats created earlier).
+- name: Gitea | Set the attendee password
+  ansible.builtin.uri:
+    url: "{{ gitea_url }}/api/v1/admin/users/{{ gitea_user }}"
+    method: PATCH
+    user: gitea-admin
+    password: "{{ gitea_cr.resources[0].status.adminPassword }}"
+    force_basic_auth: true
+    validate_certs: false
+    body_format: json
+    body:
+      login_name: "{{ gitea_user }}"
+      source_id: 0
+      password: "{{ gitea_user_password_wanted }}"
+      must_change_password: false
+    status_code: 200
+  when: gitea_user_password_wanted | length > 0
+  changed_when: false  # the API does not report whether the password changed
+  no_log: true
+
 - name: Gitea | Check for the bootstrap repository
   ansible.builtin.uri:
     url: "{{ gitea_url }}/api/v1/repos/{{ gitea_user }}/{{ gitea_repo_name }}"

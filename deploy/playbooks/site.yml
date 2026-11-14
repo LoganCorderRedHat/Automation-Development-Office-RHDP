@@ -39,9 +39,8 @@
         name: gitea
       vars:
         gitea_token_secret_namespace: "{{ _workshop_namespace }}"
-        # The RHDP OpenShift admin password (from the job's Secret), so the
-        # guide can show it; random when the order does not provide one.
-        gitea_user_password_wanted: "{{ lookup('ansible.builtin.env', 'SEAT_GITEA_USER_PASSWORD') }}"
+        # Fixed lab password shown in the guide (ansible.extraVars).
+        gitea_user_password_wanted: "{{ gitea_user_password | default('redhat123') }}"
 
     - name: Deploy the ADO Preflight UI
       ansible.builtin.include_role:

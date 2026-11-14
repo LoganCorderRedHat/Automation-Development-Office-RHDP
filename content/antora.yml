@@ -9,16 +9,12 @@ asciidoc:
     experimental: true
     page-pagination: true
     # Placeholders for local builds only. At order time Showroom replaces them
-    # with each seat's values from RHDP user data, including the
-    # ado-workshop-userinfo ConfigMap that deploy/playbooks/site.yml publishes.
+    # with each seat's values from RHDP user data (these names are confirmed
+    # on a real Field Sourced Content order). Our own URLs are built from
+    # openshift_cluster_ingress_domain in partials/seat.adoc.
     guid: abc123
     openshift_console_url: https://console-openshift-console.apps.cluster-abc123.example.com
-    openshift_api_url: https://api.cluster-abc123.example.com:6443
-    openshift_base_domain: cluster-abc123.example.com
-    openshift_apps_domain: apps.cluster-abc123.example.com
-    preflight_url: https://ado-preflight-ui-ado-workshop.apps.cluster-abc123.example.com
-    gitea_url: https://gitea-gitea.apps.cluster-abc123.example.com
-    gitea_user: lab-user
-    gitea_password: example-password
-    gitea_token: example-token
-    bootstrap_repo_url: https://gitea-gitea.apps.cluster-abc123.example.com/lab-user/ado-bootstrap.git
+    openshift_api_server_url: https://api.cluster-abc123.example.com:6443
+    openshift_cluster_ingress_domain: apps.cluster-abc123.example.com
+    openshift_cluster_admin_username: admin
+    openshift_cluster_admin_password: example-password

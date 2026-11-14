@@ -1,0 +1,6 @@
+// Seat values built from attributes RHDP always provides. Our seat setup
+// creates these objects with fixed names, so the URLs are predictable.
+:preflight_url: https://ado-preflight-ui-ado-workshop.{openshift_cluster_ingress_domain}
+:gitea_url: https://gitea-gitea.{openshift_cluster_ingress_domain}
+:gitea_user: lab-user
+:bootstrap_repo_url: https://gitea-gitea.{openshift_cluster_ingress_domain}/lab-user/ado-bootstrap.git

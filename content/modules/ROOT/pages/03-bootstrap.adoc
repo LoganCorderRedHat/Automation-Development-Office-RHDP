@@ -1,5 +1,6 @@
 = Run Bootstrap
 :navtitle: 3. Run Bootstrap
+include::partial$seat.adoc[]
 
 Bootstrap turns your answers into a Git repository of Ansible automation.
 

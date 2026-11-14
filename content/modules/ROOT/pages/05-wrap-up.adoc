@@ -1,5 +1,6 @@
 = Wrap-up
 :navtitle: 5. Wrap-up
+include::partial$seat.adoc[]
 
 In this module you:
 

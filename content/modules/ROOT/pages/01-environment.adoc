@@ -1,5 +1,6 @@
 = Your lab environment
 :navtitle: 1. Your lab environment
+include::partial$seat.adoc[]
 
 Everything below was set up for you when your seat was ordered. The values are yours alone.
 
@@ -11,7 +12,7 @@ Everything below was set up for you when your seat was ordered. The values are y
 |link:{openshift_console_url}[{openshift_console_url},window=_blank]
 
 |OpenShift API URL
-|`{openshift_api_url}`
+|`{openshift_api_server_url}`
 
 |ADO Preflight
 |link:{preflight_url}[{preflight_url},window=_blank]
@@ -19,11 +20,11 @@ Everything below was set up for you when your seat was ordered. The values are y
 |Gitea (Git server)
 |link:{gitea_url}[{gitea_url},window=_blank]
 
-|Gitea user and password
-|`{gitea_user}` / `{gitea_password}`
+|OpenShift admin user and password
+|`{openshift_cluster_admin_username}` / `{openshift_cluster_admin_password}`
 
-|Gitea access token
-|`{gitea_token}`
+|Gitea user and password
+|`{gitea_user}` / `{openshift_cluster_admin_password}` (same password as OpenShift)
 
 |Bootstrap repository (empty)
 |`{bootstrap_repo_url}`
@@ -31,24 +32,19 @@ Everything below was set up for you when your seat was ordered. The values are y
 
 == Log in to OpenShift
 
-. Open the link:{openshift_console_url}[OpenShift console,window=_blank] and log in with the admin user from your RHDP order page.
+. Open the link:{openshift_console_url}[OpenShift console,window=_blank] and log in as `{openshift_cluster_admin_username}` with password `{openshift_cluster_admin_password}`.
 
 == Get an API token for Preflight
 
 ADO needs an OpenShift API token to configure your cluster.
 
-. Open the *Terminal* tab on the right of this guide (or the web terminal in the OpenShift console).
-. Print your token:
-+
-[source,bash]
-----
-oc whoami -t
-----
-. Copy the token. You paste it into Preflight in the next section.
+. In the OpenShift console, open the user menu (your user name, top right) and click *Copy login command*.
+. Log in again if asked, then click *Display Token*.
+. Copy the value after *Your API token is* (it starts with `sha256~`). You paste it into Preflight in the next section.
 
 NOTE: In a real environment you would use a cluster-admin service account token, as Preflight's help text suggests. Your login token is fine for this workshop.
 
 == Look at the empty bootstrap repository
 
-. Open link:{gitea_url}[Gitea,window=_blank] and sign in as `{gitea_user}` with password `{gitea_password}`.
+. Open link:{gitea_url}[Gitea,window=_blank] and sign in as `{gitea_user}` with password `{openshift_cluster_admin_password}`.
 . Open the `ado-bootstrap` repository. It has a single first commit and a README. ADO fills it in the next sections.

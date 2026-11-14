@@ -46,6 +46,13 @@ spec:
           value: {{ .Values.ansible.playbook | quote }}
         - name: NAMESPACE
           value: {{ .Values.namespace.name | quote }}
+        # Seat password from the RHDP order (templates/secret.yaml), if any.
+        - name: SEAT_GITEA_USER_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "ansible-runner.fullname" . }}-seat
+              key: gitea-user-password
+              optional: true
         {{- if .Values.ansible.repository.secretName }}
         # Git credentials (if using private repository)
         - name: GIT_USERNAME

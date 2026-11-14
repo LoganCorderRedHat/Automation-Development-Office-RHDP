@@ -7,6 +7,8 @@ gitea_namespace: gitea
 gitea_instance_name: gitea
 # One attendee account per seat (giteaGenerateUserFormat with giteaUserNumber: 1).
 gitea_user: lab-user
+# Password for the attendee account. Empty: the operator generates one.
+gitea_user_password_wanted: ""
 # Empty repository (first commit only) that ADO Bootstrap pushes into.
 gitea_repo_name: ado-bootstrap
 gitea_token_name: ado-workshop

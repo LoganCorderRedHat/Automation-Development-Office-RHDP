@@ -1,5 +1,6 @@
 = Welcome to the ADO workshop
 :navtitle: Welcome
+include::partial$seat.adoc[]
 
 In this workshop you use *ADO (Automation Development Office)* to automate an OpenShift cluster that is yours for the session.
 
@@ -16,4 +17,4 @@ ADO has two parts:
 
 This guide uses Preflight's *Not using AAP* option. Running the same playbooks from Ansible Automation Platform is a separate module.
 
-TIP: Keep this guide open on the left. Open the OpenShift console, ADO Preflight, and Gitea in separate browser tabs; each link in this guide opens a new tab.
+TIP: Keep this guide open. Open the OpenShift console, ADO Preflight, and Gitea in separate browser tabs; each link in this guide opens a new tab.

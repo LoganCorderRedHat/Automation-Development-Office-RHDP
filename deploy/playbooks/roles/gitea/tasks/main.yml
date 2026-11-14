@@ -67,6 +67,23 @@
         labels:
           demo.redhat.com/application: ado-workshop
 
+- name: Gitea | Save the attendee password
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: gitea-user-password
+        namespace: "{{ gitea_namespace }}"
+        labels:
+          demo.redhat.com/application: ado-workshop
+      type: Opaque
+      stringData:
+        userPassword: "{{ gitea_user_password_wanted }}"
+  when: gitea_user_password_wanted | length > 0
+  no_log: true
+
 - name: Gitea | Create the Gitea instance with one attendee account
   kubernetes.core.k8s:
     state: present
@@ -88,6 +105,8 @@
         giteaGenerateUserFormat: "{{ gitea_user }}"
         giteaUserNumber: 1
         giteaUserPasswordLength: 16
+        # Uses the saved password when there is one (operator secret key: userPassword).
+        giteaUserPasswordSecretName: "{{ 'gitea-user-password' if gitea_user_password_wanted | length > 0 else omit }}"
         giteaDisableRegistration: true
 
 - name: Gitea | Wait for the instance, admin, and attendee account
@@ -108,7 +127,7 @@
 - name: Gitea | Record the URL and attendee login
   ansible.builtin.set_fact:
     gitea_url: "{{ gitea_cr.resources[0].status.giteaRoute | regex_replace('/$', '') }}"
-    gitea_user_password: "{{ gitea_cr.resources[0].status.userPassword }}"
+    gitea_user_password: "{{ gitea_user_password_wanted if gitea_user_password_wanted | length > 0 else gitea_cr.resources[0].status.userPassword }}"
   no_log: true
 
 - name: Gitea | Wait for the Gitea API to answer

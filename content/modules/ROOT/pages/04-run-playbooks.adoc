@@ -1,5 +1,6 @@
 = Run the playbooks from the container
 :navtitle: 4. Run the playbooks from the container
+include::partial$seat.adoc[]
 
 With *Not using AAP*, Preflight can run the generated playbooks itself.
 
@@ -19,11 +20,5 @@ With *Not using AAP*, Preflight can run the generated playbooks itself.
 *OpenShift Compliance Operator*
 
 . In the console, open *Operators → Installed Operators* and select project `openshift-compliance`. The Compliance Operator shows *Succeeded*.
-. Or, in the *Terminal* tab:
-+
-[source,bash]
-----
-oc get csv -n openshift-compliance
-----
 
 You configured your cluster from answers in a form, with every change kept as code in Git.

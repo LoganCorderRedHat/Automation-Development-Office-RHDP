@@ -1,5 +1,6 @@
 = Fill out ADO Preflight
 :navtitle: 2. Fill out ADO Preflight
+include::partial$seat.adoc[]
 
 Open link:{preflight_url}[ADO Preflight,window=_blank]. The form has four steps. You fill them out from top to bottom.
 
@@ -13,7 +14,7 @@ Open link:{preflight_url}[ADO Preflight,window=_blank]. The form has four steps.
 |`prod`
 
 |Base Infrastructure Domain
-|`{openshift_base_domain}`
+|Your cluster domain without the leading `apps.`: from `{openshift_cluster_ingress_domain}`, drop `apps.`
 
 |Ansible Automation Platform
 |*Not using AAP*
@@ -42,13 +43,13 @@ Why *Not using AAP*: in this mode Bootstrap only generates the playbook reposito
 |Field |What to enter
 
 |OpenShift API Host
-|`{openshift_api_url}`
+|`{openshift_api_server_url}`
 
 |OpenShift Apps Domain
-|Filled in for you as `{openshift_apps_domain}` (from the base domain)
+|Filled in from the base domain. Check that it shows `{openshift_cluster_ingress_domain}`.
 
 |OpenShift API Token
-|The token from `oc whoami -t`
+|The token from *Copy login command*
 |===
 . Open the *console* tab and set *Console Banner Text* to a message of your own, for example `Hello from ADO!`.
 
@@ -76,7 +77,7 @@ This is where Bootstrap pushes the generated repository.
 |`{gitea_user}`
 
 |Git token
-|`{gitea_token}`
+|Your Gitea password, `{openshift_cluster_admin_password}` (Gitea accepts it over HTTPS)
 |===
 
 == Step 4: Ansible Automation Platform Configuration

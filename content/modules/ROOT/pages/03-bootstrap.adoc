@@ -1,0 +1,34 @@
+= Run Bootstrap
+:navtitle: 3. Run Bootstrap
+
+Bootstrap turns your answers into a Git repository of Ansible automation.
+
+== Run it
+
+. In the *ADO Bootstrap Console*, click *Run Bootstrap*.
+. Watch the log. Bootstrap runs Ansible inside the Preflight container. It takes about one to two minutes.
+. Bootstrap succeeds when the log ends with a play recap that shows `failed=0`.
+
+== See what ADO generated
+
+. Open link:{gitea_url}/{gitea_user}/ado-bootstrap[your ado-bootstrap repository,window=_blank] in Gitea.
+. You now have a new commit, *Generate bootstrap playbook repo*, with content like:
++
+[cols="1,3"]
+|===
+|Path |What it is
+
+|`playbooks/`
+|One playbook per application you selected (`console`, `ocp_compliance`) plus the OpenShift setup
+
+|`group_vars/`
+|Environment variables and encrypted vault files, generated from your answers
+
+|`inventory`, `ansible.cfg`
+|Ready to run with `ansible-playbook`
+
+|`local_components.py`
+|The runner Preflight uses to run the playbooks from the container
+|===
+
+This repository is the real output of ADO: anyone can clone it and run the same automation, from a laptop, a CI pipeline, or Ansible Automation Platform.

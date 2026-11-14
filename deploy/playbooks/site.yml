@@ -66,6 +66,10 @@
           data:
             ado_workshop_status: ready
             openshift_api_url: "{{ cluster_api_url }}"
+            # Preflight "Base Infrastructure Domain" (its apps domain is apps.<this>).
+            openshift_base_domain: "{{ cluster_domain | regex_replace('^apps\\.', '') }}"
+            openshift_apps_domain: "{{ cluster_domain }}"
+            openshift_console_url: "https://console-openshift-console.{{ cluster_domain }}"
             preflight_url: "{{ preflight_url }}"
             gitea_url: "{{ gitea_url }}"
             gitea_user: "{{ gitea_user | default('lab-user') }}"

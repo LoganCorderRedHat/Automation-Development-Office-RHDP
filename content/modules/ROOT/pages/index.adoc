@@ -1,12 +1,19 @@
 = Welcome to the ADO workshop
 :navtitle: Welcome
 
-NOTE: Draft placeholder. The workshop modules are being written; see `docs/DESIGN.md` in the repository.
+In this workshop you use *ADO (Automation Development Office)* to automate an OpenShift cluster that is yours for the session.
 
-In this workshop you use *ADO (Automation Development Office)* to automate an OpenShift cluster that is yours for the session:
+ADO has two parts:
 
-. Answer a few questions in the *ADO Preflight UI*.
-. Run *Bootstrap*. ADO generates a Git repository of playbooks and creates the matching job templates in *Ansible Automation Platform*.
-. Run those job templates to deploy OpenShift Day 1 apps, and watch them come up in the cluster.
+* *ADO Preflight* is a web form. You answer questions about your environment: the cluster, which applications to deploy, and where to keep the generated automation.
+* *The ADO Ansible collection* turns those answers into a ready-to-run Git repository of Ansible playbooks, variables, and encrypted vault files.
 
-Your cluster: {openshift_console_url}
+== What you will do
+
+. Fill out ADO Preflight for your cluster.
+. Run *Bootstrap*. ADO generates the playbook repository and pushes it to your Git server.
+. Run the generated playbooks *straight from the Preflight container*, without Ansible Automation Platform, and watch them configure your cluster: a console banner and the OpenShift Compliance Operator.
+
+This guide uses Preflight's *Not using AAP* option. Running the same playbooks from Ansible Automation Platform is a separate module.
+
+TIP: Keep this guide open on the left. Open the OpenShift console, ADO Preflight, and Gitea in separate browser tabs; each link in this guide opens a new tab.

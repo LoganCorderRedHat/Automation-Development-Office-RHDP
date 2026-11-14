@@ -1,1 +1,7 @@
 * xref:index.adoc[Welcome]
+* xref:01-environment.adoc[1. Your lab environment]
+* xref:02-preflight.adoc[2. Fill out ADO Preflight]
+* xref:03-bootstrap.adoc[3. Run Bootstrap]
+* xref:04-run-playbooks.adoc[4. Run the playbooks from the container]
+* xref:05-wrap-up.adoc[5. Wrap-up]
+* xref:troubleshooting.adoc[Troubleshooting]

@@ -1,0 +1,89 @@
+= Fill out ADO Preflight
+:navtitle: 2. Fill out ADO Preflight
+
+Open link:{preflight_url}[ADO Preflight,window=_blank]. The form has four steps. You fill them out from top to bottom.
+
+== Step 1: Core Environment
+
+[cols="1,2"]
+|===
+|Field |What to enter
+
+|Environment Type
+|`prod`
+
+|Base Infrastructure Domain
+|`{openshift_base_domain}`
+
+|Ansible Automation Platform
+|*Not using AAP*
+
+|Profiles → Target Platform
+|*OpenShift*
+
+|Profiles → Deployment Mode
+|*Connected*
+
+|Profiles → Profile (OpenShift)
+|*Custom* (you pick the applications in the next step)
+|===
+
+Why *Not using AAP*: in this mode Bootstrap only generates the playbook repository, and you run the playbooks from the Preflight container. Ansible Automation Platform is not involved.
+
+== Step 2: Component Configuration
+
+. Under *OpenShift Applications*, select:
+** `console` (a console banner)
+** *OpenShift Compliance Operator*
+. Open the *openshift* tab and fill in the connection:
++
+[cols="1,2"]
+|===
+|Field |What to enter
+
+|OpenShift API Host
+|`{openshift_api_url}`
+
+|OpenShift Apps Domain
+|Filled in for you as `{openshift_apps_domain}` (from the base domain)
+
+|OpenShift API Token
+|The token from `oc whoami -t`
+|===
+. Open the *console* tab and set *Console Banner Text* to a message of your own, for example `Hello from ADO!`.
+
+== Step 3: Git Configuration
+
+This is where Bootstrap pushes the generated repository.
+
+[cols="1,2"]
+|===
+|Field |What to enter
+
+|SCM Tool
+|*other*
+
+|Automatically commit and push generated content to Git
+|*Checked*. If this is not checked, Bootstrap writes the repository only inside the Preflight pod.
+
+|Project Git Source URL
+|`{bootstrap_repo_url}`
+
+|Git Branch
+|`main`
+
+|Git username
+|`{gitea_user}`
+
+|Git token
+|`{gitea_token}`
+|===
+
+== Step 4: Ansible Automation Platform Configuration
+
+With *Not using AAP*, this step only needs:
+
+. *Vault Password*: choose a password. ADO encrypts the generated vault files with it.
+. *After bootstrap succeeds, open the playbook runner automatically*: check it.
+
+You are ready to run Bootstrap.

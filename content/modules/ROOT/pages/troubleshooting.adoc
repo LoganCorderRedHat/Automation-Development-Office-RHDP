@@ -1,0 +1,27 @@
+= Troubleshooting
+:navtitle: Troubleshooting
+
+[cols="1,2"]
+|===
+|Symptom |What to do
+
+|Bootstrap finished, but nothing new in Gitea
+|*Automatically commit and push generated content to Git* (step 3) was not checked. Check it and run Bootstrap again.
+
+|Bootstrap stops with *Missing Vault password*
+|Enter a *Vault Password* in step 4.
+
+|*Run selected playbooks* says "Run Bootstrap successfully with Not using AAP before running playbooks"
+|Run Bootstrap with *Not using AAP* selected in step 1, and wait until it finishes with `failed=0`.
+
+|Playbooks fail with `Unauthorized` (401)
+|Your OpenShift token expired. Run `oc whoami -t` again and update *OpenShift API Token* in step 2.
+
+|Playbooks fail with a certificate error for the API
+|Check *Skip TLS certificate verification for self-signed certificates* on the *openshift* tab and run again.
+
+|Git push fails with `401` or `403`
+|Check the Git username (`{gitea_user}`) and token in step 3.
+|===
+
+Still stuck? Ask your instructor. They can read the Preflight log with `oc logs deploy/ado-preflight-ui -n ado-workshop`.

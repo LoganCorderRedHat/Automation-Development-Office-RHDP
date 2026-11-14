@@ -1,0 +1,41 @@
+= See what you built
+:navtitle: 4. See what you built
+include::partial$seat.adoc[]
+
+One form, one Bootstrap, one run. Here is what ADO did to your cluster.
+
+== Your console banner
+
+Refresh the link:{openshift_console_url}[OpenShift console,window=_blank]. Your message is at the top, in the colors you picked.
+
+== Three new Operators
+
+. Open *Operators → Installed Operators* and select *All Projects*.
+. These show *Succeeded*:
+** Advanced Cluster Management for Kubernetes, in `open-cluster-management`
+** multicluster engine for Kubernetes, in `multicluster-engine` (ACM installs it for you)
+** OpenShift Virtualization, in `openshift-cnv`
+** Migration Toolkit for Virtualization, in `openshift-mtv`
+
+== ACM: manage a fleet of clusters
+
+. Open the perspective switcher at the top of the left navigation. *Fleet Management* is new: it is ACM's multicluster view. (Older ACM versions call it *All Clusters*.)
+. Select it and open *Infrastructure → Clusters*. Your own cluster is listed as `local-cluster`, managed by ACM.
+
+== OpenShift Virtualization and MTV
+
+* *Virtualization* now appears in the console. Open it to see the *Overview* and *VirtualMachines* pages. Your cluster can run virtual machines.
+* *Migration for Virtualization* now appears in the console too. MTV migrates virtual machines from VMware vSphere and other platforms into OpenShift Virtualization.
+
+== Your new login
+
+. In the console, open the user menu (top right) and click *Log out*.
+. The login page now offers two choices: `rhbk` (your original login) and `{htpasswd_idp}` (the one ADO just added).
+. Click *{htpasswd_idp}* and log in as `{htpasswd_user}` with the password you chose in Step 4.
+. The user menu shows `{htpasswd_user}`. It is a cluster-admin, so you see everything you saw before.
+
+Both logins keep working. Log back in as `{openshift_cluster_admin_username}` through `rhbk` whenever you like.
+
+== What just happened
+
+You answered one form. ADO turned it into versioned, encrypted, ready-to-run Ansible in Git, and then ran it: a new identity provider, a console banner, and three Operators with their custom resources, without writing a line of YAML.

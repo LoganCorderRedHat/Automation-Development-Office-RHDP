@@ -23,6 +23,7 @@ templates that deploy OpenShift Day 1 apps.
 | Preflight form | **Attendees fill out the Preflight form themselves** (that is the point of the workshop). No pre-filled JSON; the guide shows each seat's values to type. |
 | AAP without Hub | Seat setup turns off the Controller setting *Enable Collection(s) Download* (`AWX_COLLECTIONS_ENABLED`); jobs use the collections inside `ado-ee` (open item 2, option a). |
 | Infrastructure | **CNV, multi-node** (decided 2026-11-13; replaces AWS). About 15 minutes to provision instead of 60+, cheaper, sizing by worker count, CPU, and memory. Nothing in the storyline needs AWS. |
+| Not using AAP module | Attendees select **Admin HTPasswd** (user `ado-admin`), **Console Banner**, **ACM**, **OpenShift Virtualization**, and **MTV**, then run them from the Preflight container. The guide has one page per Preflight step, in the form's order (decided 2026-11-13). All five work on the default RBD StorageClass (no RWX needed). |
 
 ## Proposed architecture (to be confirmed)
 
@@ -106,8 +107,10 @@ took about 9 minutes to reach Running.
    - **Pre-filling the form:** only through **Upload JSON** (file import).
      There is no environment-variable or URL pre-fill. See open item 7.
    - **Running playbooks from the container:** supported. After Bootstrap,
-     **Run selected playbooks** runs the generated components inside the pod
-     (no AAP); **Preview commands** shows them first.
+     the Step 6 button changes to **Run Playbooks**, which runs the generated
+     components inside the pod (no AAP) in workflow order, stopping at the
+     first failure; **Preview commands** in the *Generated Playbooks* panel
+     shows them first.
 4. **Exact Helm value names — answered (first test order).** `aap.url`,
    `aap.adminUser`, `aap.adminPassword`, `bases.*`, `guid`, `openshift.*`,
    `keycloak.*`; see [RHDP-PLATFORM.md](RHDP-PLATFORM.md). The `aap` role
@@ -147,6 +150,33 @@ took about 9 minutes to reach Running.
     collection. The form has no image field, so without a Preflight change
     the AAP path needs the EE pointed at `ado-ee` (for example a guide step in
     AAP after Bootstrap). No Preflight edits for now (2026-11-13).
+
+11. **Preflight form (image `5.0.1-prerelease`), mapped 2026-11-13** by
+    running the pinned image locally and walking the form in a headless
+    browser (no cluster changes). Six steps: Environment & Platform
+    Selection, Git configuration, Platform Configuration, Components &
+    Profiles, Review & Validate, Bootstrap Execution. Findings the guide
+    relies on:
+    - Step 1 defaults to **Disconnected** and **Using AAP**; attendees must
+      change both. The vault password is in Step 1.
+    - Step 2 *Automatically push generated automation to Git* is under
+      *Advanced Git Settings* and is off by default.
+    - Step 3 API URL defaults to an example value; *Skip TLS* is on by
+      default (the RHDP API certificate is not publicly trusted; the Gitea
+      route certificate is).
+    - Admin HTPasswd is on Preflight's "during-bootstrap" list, but the form
+      never sets `openshift.install_htpasswd_during_bootstrap`, so Bootstrap
+      only generates `playbooks/openshift/ado-create-htpass-user-bootstrap.yml`
+      and the runner applies it. The role appends its IdP next to `rhbk`.
+    - Generated secrets are not pushed: `ado-preflight-<env>.json`,
+      `ado-extra-vars.json`, and `.vault_pass` stay in the pod; the
+      `vault_*.yml` files in Gitea are encrypted.
+12. **To verify in the dry run (Not using AAP module):** total run time of
+    the five playbooks (guide says about 20 to 30 minutes); console labels
+    for ACM (*Fleet Management*), Virtualization, and MTV on OCP 4.22;
+    the HTPasswd playbook in a real Bootstrap and the `htpasswd-admin`
+    login; the wrap-up "change an answer" flow; worker headroom with AAP
+    also installed.
 
 ## Next steps
 

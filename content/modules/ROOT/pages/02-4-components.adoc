@@ -1,0 +1,85 @@
+= Step 4: Components & Profiles
+:navtitle: Step 4: Components & Profiles
+include::partial$seat.adoc[]
+
+This is where you decide what ADO builds on your cluster.
+
+== Automation Profile
+
+Leave *Profile* on *Custom — Choose components manually*.
+
+Profiles such as *Virtualization* or *Full Platform* select a set of related components for you. In this workshop you pick them yourself.
+
+== Components
+
+. Click *All Components*. The catalog is in alphabetical order. The *Applications*, *OpenShift Options*, and *Operators* buttons filter it, and the search box finds a component by name.
+. Check the five components below, in the order they appear in the catalog. When you check one, its settings open under it.
+
+=== ACM Operator
+
+Installs Red Hat Advanced Cluster Management for Kubernetes and creates its MultiClusterHub in namespace `open-cluster-management`.
+
+Leave the defaults:
+
+* *Operator Channel*: `release-2.17`
+* *Enable Multicluster Observability*: unchecked (it needs S3 object storage, which this lab does not have)
+* *Generate namespace-label policy*: unchecked
+
+=== Admin HTPasswd
+
+Adds an HTPasswd login to your cluster with a cluster-admin user. ADO adds it next to your current login; it does not remove anything.
+
+[cols="1,2"]
+|===
+|Field |What to enter
+
+|User change (IdP stays)
+|Leave *add (merge users)*
+
+|Login button name (IdP)
+|Leave `{htpasswd_idp}`
+
+|Username
+|`{htpasswd_user}` (replace `admin`)
+
+|Password
+|A password of your choice. Write it down: you log in with it at the end.
+
+|Role
+|Leave `cluster-admin`
+|===
+
+Why `{htpasswd_user}`: you already log in as `{openshift_cluster_admin_username}`. A different name makes the new login easy to spot.
+
+=== Console Banner
+
+Adds a banner to the top of the OpenShift console.
+
+* *Console Banner Text*: replace the default with a message of your own, for example `Built with ADO!`
+* *Console Banner Background Color* and *Console Banner Text Color*: pick any colors you like.
+* Leave *Banner action* on *Add (keep existing ADO banners)* and *Console Banner Location* on *BannerTop*.
+
+=== Migration Toolkit for Virtualization
+
+Installs the Migration Toolkit for Virtualization (MTV) and creates its ForkliftController in namespace `openshift-mtv`.
+
+Leave the defaults: *Operator Channel* `release-v2.12` and *Namespace* `openshift-mtv`.
+
+=== OCP Virtualization
+
+Installs OpenShift Virtualization and creates its HyperConverged resource in namespace `openshift-cnv`.
+
+Leave the defaults:
+
+* *Operator channel*: `stable`
+* *Enable KubeSecondaryDNS*: unchecked
+* *Also install Migration Toolkit for Virtualization (MTV)*: checked (you selected MTV above)
+* *Enable Multicluster Observability (Fleet Virt metrics)*: unchecked
+
+== Check your selection
+
+. Click *Selected*. You see your five components, and the header shows *5 selected*.
+. *ACM Operator*, *Admin HTPasswd*, and *Console Banner* show *Ready*. If *Admin HTPasswd* shows *Attention Needed*, its password is still empty.
+. *Migration Toolkit for Virtualization* and *OCP Virtualization* show *Not validated*. That is expected: Preflight does not have field checks for them yet, and Bootstrap still works.
+
+Click *Next*.

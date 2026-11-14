@@ -1,0 +1,25 @@
+= Run the playbooks
+:navtitle: 3. Run the playbooks
+include::partial$seat.adoc[]
+
+Now ADO configures your cluster. With *Not using AAP*, Preflight runs the generated playbooks itself, from inside its container.
+
+== Review the plan
+
+. Under the Bootstrap console, the *Generated Playbooks* panel is open. (It opened by itself because of the option you left checked in Step 3. If it is closed, click it.)
+. Each row is one playbook: its title, its path in the repository, and *Makes cluster changes*. The number on the left is the run order. Preflight runs them in workflow order and stops at the first failure.
+. Optional: click *Preview commands* to see the exact `ansible-playbook` commands Preflight will run. Secrets are redacted.
+
+== Run them
+
+. Click *Run Playbooks* in the Bootstrap console.
+. Watch the log. All five take about 20 to 30 minutes; ACM alone takes about 10.
+
+While they run:
+
+* In the link:{openshift_console_url}[OpenShift console,window=_blank], open *Operators → Installed Operators*, select *All Projects*, and watch the Operators appear one by one.
+* Look through the playbooks and `group_vars` in link:{gitea_url}/{gitea_user}/ado-bootstrap[Gitea,window=_blank]. That is exactly what is running now.
+
+When the HTPasswd playbook runs, the cluster's login pods restart. Your current console session keeps working.
+
+The run is done when the log ends without a failure and the button changes to *Run Playbooks Again*.

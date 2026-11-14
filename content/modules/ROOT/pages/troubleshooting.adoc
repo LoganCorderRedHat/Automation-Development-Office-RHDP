@@ -7,22 +7,31 @@ include::partial$seat.adoc[]
 |Symptom |What to do
 
 |Bootstrap finished, but nothing new in Gitea
-|*Automatically commit and push generated content to Git* (step 3) was not checked. Check it and run Bootstrap again.
-
-|Bootstrap stops with *Missing Vault password*
-|Enter a *Vault Password* in step 4.
-
-|*Run selected playbooks* says "Run Bootstrap successfully with Not using AAP before running playbooks"
-|Run Bootstrap with *Not using AAP* selected in step 1, and wait until it finishes with `failed=0`.
-
-|Playbooks fail with `Unauthorized` (401)
-|Your OpenShift token expired. Get a new one with *Copy login command* and update *OpenShift API Token* in step 2.
-
-|Playbooks fail with a certificate error for the API
-|Check *Skip TLS certificate verification for self-signed certificates* on the *openshift* tab and run again.
+|*Automatically push generated automation to Git* was not checked. Check it in Step 2 under *Advanced Git Settings*, and run Bootstrap again.
 
 |Git push fails with `401` or `403`
-|Check the Git username (`{gitea_user}`) and token in step 3.
+|In Step 2, check *Git username* (`{gitea_user}`) and *Personal access token* (`{gitea_password}`).
+
+|Step 3 shows an apps domain starting with `apps.apps.`
+|In Step 1, remove `apps.` from the front of *Domain*.
+
+|Bootstrap stops: Admin HTPasswd user has an empty password
+|In Step 4, open *Admin HTPasswd* and set a *Password*.
+
+|The button never changes to *Run Playbooks*
+|Make sure Step 1 is set to *Not using AAP*, *Simulation* is unchecked in Step 6, and Bootstrap finished with *Status* *Complete*.
+
+|Playbooks fail with `Unauthorized` (401)
+|Your OpenShift token expired. Get a new one with *Copy login command* and update *OpenShift API Token* in Step 3.
+
+|Playbooks fail with a certificate error for the API
+|In Step 3, check *Skip TLS certificate verification for self-signed certificates*, then run again.
+
+|ACM is still installing after several minutes
+|The MultiClusterHub takes about 10 minutes. Let the playbook wait. Do not create a MultiClusterEngine by hand; ACM creates it.
+
+|The `{htpasswd_idp}` login fails right after the run
+|The login pods are still restarting. Wait a minute and try again.
 |===
 
 Still stuck? Ask your instructor. In the OpenShift console they can open *Workloads → Pods* in project `ado-workshop` and read the `ado-preflight-ui` pod log.

@@ -2,89 +2,33 @@
 :navtitle: 2. Fill out ADO Preflight
 include::partial$seat.adoc[]
 
-Open link:{preflight_url}[ADO Preflight,window=_blank]. The form has four steps. You fill them out from top to bottom.
+Open link:{preflight_url}[ADO Preflight,window=_blank].
 
-== Step 1: Core Environment
+On the left, under *Build Your Automation*, Preflight lists six steps. The next six pages of this guide match them, in the same order:
 
-[cols="1,2"]
+[cols="1,3"]
 |===
-|Field |What to enter
+|Preflight step |What you do there
 
-|Environment Type
-|`prod`
+|1. Environment & Platform Selection
+|Name the environment, pick *Not using AAP*, choose OpenShift, and set a vault password
 
-|Base Infrastructure Domain
-|Your cluster domain without the leading `apps.`: from `{openshift_cluster_ingress_domain}`, drop `apps.`
+|2. Git configuration
+|Point Preflight at your Gitea repository
 
-|Ansible Automation Platform
-|*Not using AAP*
+|3. Platform Configuration
+|Connect Preflight to your cluster's API
 
-|Profiles → Target Platform
-|*OpenShift*
+|4. Components & Profiles
+|Pick what to build: HTPasswd login, console banner, ACM, OpenShift Virtualization, and MTV
 
-|Profiles → Deployment Mode
-|*Connected*
+|5. Review & Validate
+|Check your answers
 
-|Profiles → Profile (OpenShift)
-|*Custom* (you pick the applications in the next step)
-|===
-
-Why *Not using AAP*: in this mode Bootstrap only generates the playbook repository, and you run the playbooks from the Preflight container. Ansible Automation Platform is not involved.
-
-== Step 2: Component Configuration
-
-. Under *OpenShift Applications*, select:
-** `console` (a console banner)
-** *OpenShift Compliance Operator*
-. Open the *openshift* tab and fill in the connection:
-+
-[cols="1,2"]
-|===
-|Field |What to enter
-
-|OpenShift API Host
-|`{openshift_api_server_url}`
-
-|OpenShift Apps Domain
-|Filled in from the base domain. Check that it shows `{openshift_cluster_ingress_domain}`.
-
-|OpenShift API Token
-|The token from *Copy login command*
-|===
-. Open the *console* tab and set *Console Banner Text* to a message of your own, for example `Hello from ADO!`.
-
-== Step 3: Git Configuration
-
-This is where Bootstrap pushes the generated repository.
-
-[cols="1,2"]
-|===
-|Field |What to enter
-
-|SCM Tool
-|*other*
-
-|Automatically commit and push generated content to Git
-|*Checked*. If this is not checked, Bootstrap writes the repository only inside the Preflight pod.
-
-|Project Git Source URL
-|`{bootstrap_repo_url}`
-
-|Git Branch
-|`main`
-
-|Git username
-|`{gitea_user}`
-
-|Git token
-|Your Gitea password, `{gitea_password}` (Gitea accepts it over HTTPS)
+|6. Bootstrap Execution
+|Generate the automation and push it to Git
 |===
 
-== Step 4: Ansible Automation Platform Configuration
+Fill out each step, then click *Next* at the bottom right. When a step is complete, its number in the left sidebar turns into a green check mark. You can click any step in the sidebar to go back to it.
 
-With *Not using AAP*, this step only needs:
-
-. *Vault Password*: choose a password. ADO encrypts the generated vault files with it.
-. *After bootstrap succeeds, open the playbook runner automatically*: check it.
-
-You are ready to run Bootstrap.
+The sidebar also lists *Install*, *Configure & Tools*, and *Onboarding* actions. You do not need them in this workshop.

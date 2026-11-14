@@ -1,0 +1,61 @@
+= Step 1: Environment & Platform Selection
+:navtitle: Step 1: Environment & Platform Selection
+include::partial$seat.adoc[]
+
+This step says where your automation runs and how.
+
+== Environment
+
+[cols="1,2"]
+|===
+|Field |What to enter
+
+|Environment name
+|`prod` (already filled in)
+
+|Domain
+|Your cluster domain *without* the leading `apps.`. Take `{openshift_cluster_ingress_domain}` and drop `apps.` from the front.
+
+|Additional environments
+|Leave as is (only `prod`)
+|===
+
+Preflight builds your apps domain as `apps.` plus the *Domain*, so leaving `apps.` in the *Domain* gives `apps.apps.`. You check the result in Step 3.
+
+== Deployment Setup
+
+Both settings below start on a different value. Change them:
+
+[cols="1,2"]
+|===
+|Field |What to select
+
+|Connectivity
+|*Connected* (the default is *Disconnected / Air-gapped*)
+
+|Ansible Automation Platform
+|*Not using AAP* (the default is *Using AAP*)
+|===
+
+Why *Not using AAP*: in this mode Bootstrap only generates the playbook repository, and you run the playbooks from the Preflight container. Ansible Automation Platform is not involved.
+
+== Target Platforms
+
+Check *OpenShift*. Leave the other platforms unchecked.
+
+== Automation Security
+
+[cols="1,2"]
+|===
+|Field |What to enter
+
+|Vault credential name
+|Leave `ADO-vault`
+
+|Vault password
+|A password of your choice. ADO uses it to encrypt the secrets in the generated repository, such as your OpenShift API token and HTPasswd password.
+|===
+
+Leave *TLS / Certificate Verification* as it is.
+
+Click *Next*.

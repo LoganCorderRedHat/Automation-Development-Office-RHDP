@@ -2,17 +2,16 @@
 :navtitle: 5. Wrap-up
 include::partial$seat.adoc[]
 
-In this module you:
+In this workshop you:
 
-* Filled out ADO Preflight for your cluster.
+* Filled out ADO Preflight for your cluster, one step at a time.
 * Ran *Bootstrap*, which generated a Git repository of playbooks, variables, and encrypted vault files and pushed it to Gitea.
-* Ran those playbooks from the Preflight container to add a console banner and install the OpenShift Compliance Operator.
+* Ran those playbooks from the Preflight container to add an HTPasswd login and a console banner, and to install ACM, OpenShift Virtualization, and MTV.
 
 == Try it yourself
 
-* *Run it again.* Click *Run selected playbooks* a second time. ADO's playbooks are safe to re-run; nothing changes on the cluster.
-* *Remove the banner.* Set *Common extra vars* to `state=absent`, select only the `console` step, and run it. The banner is removed.
-* *Change an answer.* Edit the banner text, run Bootstrap again, and look at the new commit in Gitea: the change is recorded in Git.
+* *Run one playbook again.* In *Generated Playbooks*, leave only the console banner playbook checked and click *Run Playbooks Again*. ADO's playbooks are safe to re-run.
+* *Change an answer.* In Step 4, change the *Console Banner Text* and set *Banner action* to *Update (replace all ADO banners)*. In Step 2, under *Advanced Git Settings*, check *Replace existing environment variables*. Run Bootstrap again and look at the new commit in Gitea: your change is recorded in Git. Then run only the console banner playbook.
 
 == Next
 

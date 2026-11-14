@@ -1,0 +1,55 @@
+= Step 6: Bootstrap Execution
+:navtitle: Step 6: Bootstrap Execution
+include::partial$seat.adoc[]
+
+Bootstrap turns your answers into a Git repository of Ansible automation and pushes it to Gitea. It generates the playbooks; it does not run them yet.
+
+== Run Bootstrap
+
+. In the *ADO Bootstrap Console*, leave *Simulation* unchecked. (Simulation generates the files locally only and skips the Git push.)
+. Click *Run Bootstrap*.
+. Watch *Workflow Progress* work through four stages:
+** Write preflight JSON
+** Generate env vars and vault
+** Scaffold component playbooks
+** Git push bootstrap repo
+. Bootstrap takes about two minutes. When it finishes, *Status* shows *Complete*, and the main button changes from *Run Bootstrap* to *Run Playbooks*.
+
+Do not click *Run Playbooks* yet. First, look at what ADO generated.
+
+== See what ADO generated
+
+. Open link:{gitea_url}/{gitea_user}/ado-bootstrap[your ado-bootstrap repository,window=_blank] in Gitea.
+. There is a new commit from ADO. The repository now holds:
++
+[cols="2,3"]
+|===
+|Path |What it is
+
+|`playbooks/openshift/ado-create-htpass-user-bootstrap.yml`
+|Creates the HTPasswd login
+
+|`playbooks/openshift/ado-configure-console-banner-bootstrap.yml`
+|Adds the console banner
+
+|`playbooks/acm/ado-deploy-and-configure-bootstrap.yml`
+|Installs ACM
+
+|`playbooks/ocp_virtualization/ado-deploy-bootstrap.yml`
+|Installs OpenShift Virtualization
+
+|`playbooks/mtv/ado-deploy-bootstrap.yml`
+|Installs MTV
+
+|`group_vars/all/prod/`
+|Your answers: `vars_*.yml` files, and `vault_*.yml` files with the secrets
+
+|`inventory`, `ansible.cfg`
+|Ready to run with `ansible-playbook`
+
+|`local_components.py`, `component-run-plan.json`
+|What Preflight uses to run the playbooks in order
+|===
+. Open `group_vars/all/prod/vault_openshift.yml`. It starts with `$ANSIBLE_VAULT`: your API token is encrypted with your vault password, so it is safe to keep in Git.
+
+This repository is the real output of ADO. Anyone with the vault password can clone it and run the same automation from a laptop, a CI pipeline, or Ansible Automation Platform.

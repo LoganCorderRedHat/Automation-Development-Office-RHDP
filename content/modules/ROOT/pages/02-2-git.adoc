@@ -1,0 +1,38 @@
+= Step 2: Git configuration
+:navtitle: Step 2: Git configuration
+include::partial$seat.adoc[]
+
+This is the repository where Bootstrap pushes the generated automation: your `ado-bootstrap` repository in Gitea.
+
+== Repository
+
+[cols="1,2"]
+|===
+|Field |What to enter
+
+|Git provider
+|*Other*
+
+|Branch
+|`main` (already filled in)
+
+|Repository URL
+|`{bootstrap_repo_url}`
+|===
+
+== Authentication
+
+. Check *Specify Git username*.
+. *Git username*: `{gitea_user}`
+. *Personal access token*: `{gitea_password}` (your Gitea password; Gitea accepts it over HTTPS)
+
+== Advanced Git Settings
+
+. Click *Advanced Git Settings* to expand it.
+. Under *Repository Updates*, check *Automatically push generated automation to Git*.
++
+IMPORTANT: If this is not checked, Bootstrap keeps the generated files inside the Preflight pod and nothing appears in Gitea.
+. Leave *Skip Git TLS certificate verification* unchecked. Gitea uses your cluster's trusted certificate.
+. Leave the *Existing File Handling* options unchecked.
+
+Click *Next*.

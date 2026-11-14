@@ -1,0 +1,30 @@
+= Step 3: Platform Configuration
+:navtitle: Step 3: Platform Configuration
+include::partial$seat.adoc[]
+
+This step connects Preflight to your cluster.
+
+At the top, the page confirms *Not using AAP*. Leave *After Bootstrap succeeds, expand Generated Playbooks on Step 6* checked.
+
+== OpenShift
+
+[cols="1,2"]
+|===
+|Field |What to enter
+
+|OpenShift API URL
+|`{openshift_api_server_url}` (replace the example value)
+
+|OpenShift Apps Domain
+|Filled in from Step 1. Check that it shows `{openshift_cluster_ingress_domain}`. If it shows `apps.apps.`, go back to Step 1 and remove `apps.` from *Domain*.
+
+|OpenShift TLS Certificate Verification
+|Leave *Skip TLS certificate verification for self-signed certificates* checked. Your cluster's API certificate is not publicly trusted.
+
+|OpenShift API Token
+|The token you copied in xref:01-environment.adoc[Your lab environment]
+|===
+
+When everything is filled in, the *Attention Needed* label goes away.
+
+Click *Next*.

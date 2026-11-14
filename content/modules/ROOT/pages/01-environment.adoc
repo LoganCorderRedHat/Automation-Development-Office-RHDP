@@ -40,11 +40,11 @@ ADO needs an OpenShift API token to configure your cluster.
 
 . In the OpenShift console, open the user menu (your user name, top right) and click *Copy login command*.
 . Log in again if asked, then click *Display Token*.
-. Copy the value after *Your API token is* (it starts with `sha256~`). You paste it into Preflight in the next section.
+. Copy the value after *Your API token is* (it starts with `sha256~`). You paste it into Preflight in Step 3, *Platform Configuration*.
 
 NOTE: In a real environment you would use a cluster-admin service account token, as Preflight's help text suggests. Your login token is fine for this workshop.
 
 == Look at the empty bootstrap repository
 
 . Open link:{gitea_url}[Gitea,window=_blank] and sign in as `{gitea_user}` with password `{gitea_password}`.
-. Open the `ado-bootstrap` repository. It has a single first commit and a README. ADO fills it in the next sections.
+. Open the `ado-bootstrap` repository. It has a single first commit and a README. ADO fills it in when you run Bootstrap.

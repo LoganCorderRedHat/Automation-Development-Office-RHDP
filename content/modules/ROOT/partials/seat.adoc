@@ -5,3 +5,6 @@
 :gitea_user: lab-user
 :gitea_password: redhat123
 :bootstrap_repo_url: https://gitea-gitea.{openshift_cluster_ingress_domain}/lab-user/ado-bootstrap.git
+// The HTPasswd login attendees create in Preflight step 4.
+:htpasswd_user: ado-admin
+:htpasswd_idp: htpasswd-admin

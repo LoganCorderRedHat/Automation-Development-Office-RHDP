@@ -1,0 +1,32 @@
+= Step 5: Review & Validate
+:navtitle: Step 5: Review & Validate
+include::partial$seat.adoc[]
+
+Preflight shows what Bootstrap will do with your answers. Check:
+
+[cols="1,2"]
+|===
+|Line |You should see
+
+|Selected components
+|`openshift/acm`, `openshift/mtv`, `openshift/ocp_virtualization`, `openshift/admin_htpasswd`, `openshift/console_banner`
+
+|Execution mode
+|*Local / No AAP*
+
+|OpenShift API
+|`{openshift_api_server_url}`
+
+|OpenShift apps domain
+|`{openshift_cluster_ingress_domain}`
+
+|Git publishing
+|*enabled (auto_push)*
+
+|Generation readiness
+|*No wizard blockers found.*
+|===
+
+To fix something, click *Edit* next to a component, or click the step in the left sidebar.
+
+Click *Continue to Bootstrap*.

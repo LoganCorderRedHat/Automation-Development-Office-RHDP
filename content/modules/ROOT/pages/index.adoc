@@ -4,16 +4,28 @@ include::partial$seat.adoc[]
 
 In this workshop you use *ADO (Automation Development Office)* to automate an OpenShift cluster that is yours for the session.
 
+You fill out one form. ADO turns your answers into a Git repository of Ansible automation, then runs it against your cluster. When you finish, your cluster has:
+
+* A new cluster-admin login (an HTPasswd identity provider)
+* A console banner with your own message
+* Red Hat Advanced Cluster Management for Kubernetes (ACM)
+* OpenShift Virtualization
+* Migration Toolkit for Virtualization (MTV)
+
+Every change is kept as code in Git, ready to run again.
+
 ADO has two parts:
 
-* *ADO Preflight* is a web form. You answer questions about your environment: the cluster, which applications to deploy, and where to keep the generated automation.
+* *ADO Preflight* is a web form. You answer questions about your environment: the cluster, what to deploy, and where to keep the generated automation.
 * *The ADO Ansible collection* turns those answers into a ready-to-run Git repository of Ansible playbooks, variables, and encrypted vault files.
 
 == What you will do
 
-. Fill out ADO Preflight for your cluster.
+. Look around your lab environment.
+. Fill out ADO Preflight. This guide follows the form's six steps in order, one page per step.
 . Run *Bootstrap*. ADO generates the playbook repository and pushes it to your Git server.
-. Run the generated playbooks *straight from the Preflight container*, without Ansible Automation Platform, and watch them configure your cluster: a console banner and the OpenShift Compliance Operator.
+. Run the generated playbooks *straight from the Preflight container*, without Ansible Automation Platform.
+. See what you built.
 
 This guide uses Preflight's *Not using AAP* option. Running the same playbooks from Ansible Automation Platform is a separate module.
 
